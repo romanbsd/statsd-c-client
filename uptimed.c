@@ -147,5 +147,5 @@ int main(int argc, char *argv[])
     fclose(net);
     fclose(stat);
 
-    return 0;
+    exit(0);
 }
