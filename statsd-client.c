@@ -45,7 +45,7 @@ int statsd_init(const char *host, int port)
     memset(&server, 0, sizeof(server));
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
-    
+
     struct addrinfo *result = NULL, hints;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -64,7 +64,7 @@ int statsd_init(const char *host, int port)
     //     return -1;
     // }
     srandom(time(NULL));
-    
+
     return 0;
 }
 
@@ -101,10 +101,10 @@ static int should_send(float sample_rate)
     }
 }
 
-static void send_to_socket(const char *message)
+void send_to_socket(const char *message)
 {
     int slen = sizeof(server);
-    
+
     if (sendto(sock, message, strlen(message), 0, (struct sockaddr *)&server, slen)==-1) {
         perror("sendto");
     }
@@ -117,13 +117,18 @@ static void send_stat(char *stat, size_t value, const char *type, float sample_r
         return;
     }
 
+    prepare_stat(stat, value, type, sample_rate, message, MAX_MSG_LEN, 0);
+    send_to_socket(message);
+}
+
+void prepare_stat(char *stat, size_t value, const char *type, float sample_rate, char *message, size_t buflen, int lf)
+{
     cleanup(stat);
     if (sample_rate == 1.0) {
-        snprintf(message, MAX_MSG_LEN, "%s%s:%zd|%s", ns ? ns : "", stat, value, type);
+        snprintf(message, buflen, "%s%s:%zd|%s%s", ns ? ns : "", stat, value, type, lf ? "\n" : "");
     } else {
-        snprintf(message, MAX_MSG_LEN, "%s%s:%zd|%s|@%.2f", ns ? ns : "", stat, value, type, sample_rate);
+        snprintf(message, buflen, "%s%s:%zd|%s|@%.2f%s", ns ? ns : "", stat, value, type, sample_rate, lf ? "\n" : "");
     }
-    send_to_socket(message);   
 }
 
 /* public interface */
