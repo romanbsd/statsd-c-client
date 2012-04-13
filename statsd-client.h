@@ -4,6 +4,7 @@
 
 int statsd_init(const char *host, int port);
 int statsd_init_with_namespace(const char *host, int port, const char *ns);
+void statsd_finalize(void);
 
 void statsd_inc(char *stat, float sample_rate);
 void statsd_dec(char *stat, float sample_rate);

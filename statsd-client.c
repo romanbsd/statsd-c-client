@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <time.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -13,12 +14,12 @@
 
 static int sock = -1;
 static struct sockaddr_in server;
-static char *ns = "";
+static char *ns = NULL;
 
 int statsd_init_with_namespace(const char *host, int port, const char *ns_)
 {
     size_t len = strlen(ns_);
-    if (strlen(ns) > 0) {
+    if (ns) {
         free(ns);
     }
     if ( (ns = malloc(len + 2)) == NULL ) {
@@ -67,6 +68,18 @@ int statsd_init(const char *host, int port)
     return 0;
 }
 
+void statsd_finalize()
+{
+    if (sock != -1) {
+        close(sock);
+        sock = -1;
+    }
+    if (ns) {
+        free(ns);
+        ns = NULL;
+    }
+}
+
 /* will change the original string */
 static void cleanup(char *stat)
 {
@@ -106,9 +119,9 @@ static void send_stat(char *stat, size_t value, const char *type, float sample_r
 
     cleanup(stat);
     if (sample_rate == 1.0) {
-        snprintf(message, MAX_MSG_LEN, "%s%s:%zd|%s", ns, stat, value, type);
+        snprintf(message, MAX_MSG_LEN, "%s%s:%zd|%s", ns ? ns : "", stat, value, type);
     } else {
-        snprintf(message, MAX_MSG_LEN, "%s%s:%zd|%s|@%.2f", ns, stat, value, type, sample_rate);
+        snprintf(message, MAX_MSG_LEN, "%s%s:%zd|%s|@%.2f", ns ? ns : "", stat, value, type, sample_rate);
     }
     send_to_socket(message);   
 }

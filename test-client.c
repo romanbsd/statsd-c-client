@@ -16,6 +16,7 @@ int main(void)
     for(i=0; i<10; i++) {
         statsd_count("count3", i, 0.8);
     }
+    statsd_finalize();
 
     return 0;
 }
