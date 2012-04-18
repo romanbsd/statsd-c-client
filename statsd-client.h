@@ -11,9 +11,9 @@ void statsd_finalize(void);
   type can be "c", "g" or "ms"
   lf - whether line feed needs to be added
  */
-void prepare_stat(char *stat, size_t value, const char *type, float sample_rate, char *buf, size_t buflen, int lf);
+void statsd_prepare(char *stat, size_t value, const char *type, float sample_rate, char *buf, size_t buflen, int lf);
 /* manually send a message, which might be composed of several lines. Must be null-terminated */
-void send_to_socket(const char *message);
+void statsd_send(const char *message);
 
 void statsd_inc(char *stat, float sample_rate);
 void statsd_dec(char *stat, float sample_rate);

@@ -89,21 +89,21 @@ int main(int argc, char *argv[])
         pkt[0] = 0;
         sysinfo(&si);
 
-        prepare_stat("load", 100*si.loads[0]/0x10000, "g", 1.0, tmp, MAX_LINE_LEN, 1);
+        statsd_prepare("load", 100*si.loads[0]/0x10000, "g", 1.0, tmp, MAX_LINE_LEN, 1);
         strcat(pkt, tmp);
 
-        prepare_stat("freemem", si.freeram/1024, "g", 1.0, tmp, MAX_LINE_LEN, 1);
+        statsd_prepare("freemem", si.freeram/1024, "g", 1.0, tmp, MAX_LINE_LEN, 1);
         strcat(pkt, tmp);
 
 /*
-        prepare_stat("freeswap", si.freeswap/1024, "g", 1.0, tmp, MAX_LINE_LEN, 1);
+        statsd_prepare("freeswap", si.freeswap/1024, "g", 1.0, tmp, MAX_LINE_LEN, 1);
         strcat(pkt, tmp);
 */
 
-        prepare_stat("procs", si.procs, "g", 1.0, tmp, MAX_LINE_LEN, 1);
+        statsd_prepare("procs", si.procs, "g", 1.0, tmp, MAX_LINE_LEN, 1);
         strcat(pkt, tmp);
 
-        prepare_stat("uptime", si.uptime, "c", 1.0, tmp, MAX_LINE_LEN, 1);
+        statsd_prepare("uptime", si.uptime, "c", 1.0, tmp, MAX_LINE_LEN, 1);
         strcat(pkt, tmp);
 
         rewind(net);
@@ -116,10 +116,10 @@ int main(int argc, char *argv[])
             for (i = 0, p = strtok_r(line, " ", &lasts); p;
                 p = strtok_r(NULL, " ", &lasts), i++) {
                 if (i == 1) {
-                    prepare_stat("if-rx", atoi(p), "c", 1.0, tmp, MAX_LINE_LEN, 1);
+                    statsd_prepare("if-rx", atoi(p), "c", 1.0, tmp, MAX_LINE_LEN, 1);
                     strcat(pkt, tmp);
                 } else if (i == 9) {
-                    prepare_stat("if-tx", atoi(p), "c", 1.0, tmp, MAX_LINE_LEN, 1);
+                    statsd_prepare("if-tx", atoi(p), "c", 1.0, tmp, MAX_LINE_LEN, 1);
                     strcat(pkt, tmp);
                     break;
                 }
@@ -133,11 +133,11 @@ int main(int argc, char *argv[])
         total = user + sys + idle;
         busy = user + sys;
 
-        prepare_stat("cpu", 100 * (busy - old_busy)/(total - old_total), "g", 1.0, tmp, MAX_LINE_LEN, 0);
+        statsd_prepare("cpu", 100 * (busy - old_busy)/(total - old_total), "g", 1.0, tmp, MAX_LINE_LEN, 0);
         strcat(pkt, tmp);
 
         // printf("pkt:\n%s\n\n", pkt);
-        send_to_socket(pkt);
+        statsd_send(pkt);
 
         old_total = total;
         old_busy = busy;
@@ -146,6 +146,7 @@ int main(int argc, char *argv[])
 
     fclose(net);
     fclose(stat);
+    statsd_finalize();
 
     exit(0);
 }

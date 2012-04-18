@@ -101,7 +101,7 @@ static int should_send(float sample_rate)
     }
 }
 
-void send_to_socket(const char *message)
+void statsd_send(const char *message)
 {
     int slen = sizeof(server);
 
@@ -117,11 +117,11 @@ static void send_stat(char *stat, size_t value, const char *type, float sample_r
         return;
     }
 
-    prepare_stat(stat, value, type, sample_rate, message, MAX_MSG_LEN, 0);
-    send_to_socket(message);
+    statsd_prepare(stat, value, type, sample_rate, message, MAX_MSG_LEN, 0);
+    statsd_send(message);
 }
 
-void prepare_stat(char *stat, size_t value, const char *type, float sample_rate, char *message, size_t buflen, int lf)
+void statsd_prepare(char *stat, size_t value, const char *type, float sample_rate, char *message, size_t buflen, int lf)
 {
     cleanup(stat);
     if (sample_rate == 1.0) {
