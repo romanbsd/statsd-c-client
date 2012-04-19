@@ -4,6 +4,7 @@ See statsd-client.h
 
 Included is a daemon for monitoring a Linux system.
 It'll wake up every minute and monitor the following:
+
 * load
 * cpu
 * free memory
