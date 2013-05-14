@@ -67,12 +67,24 @@ statsd_link *statsd_init(const char *host, int port)
 
 void statsd_finalize(statsd_link *link)
 {
+    // close socket
     if (link->sock != -1) {
         close(link->sock);
         link->sock = -1;
     }
 
+    // freeing ns
+    if (link->ns) {
+        free(link->ns);
+        link->ns = NULL;
+    }
+
+    // free sockaddr_in
+    free(&link->server);
+
+    // free whole link
     free(link);
+
 
 }
 
