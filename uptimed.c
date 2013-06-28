@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
     char line[MAX_LINE_LEN], tmp[MAX_LINE_LEN], pkt[PKT_LEN], ns[16];
     char *lasts, *iface, *p;
     unsigned int user, nice, sys, idle, total, busy, old_total=0, old_busy=0;
+    statsd_link *link;
     int i;
 
     if (argc != 3) {
@@ -81,7 +82,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    statsd_init_with_namespace(argv[1], 8125, ns);
+    link = statsd_init_with_namespace(argv[1], 8125, ns);
 
     daemon(0,0);
 
@@ -89,10 +90,10 @@ int main(int argc, char *argv[])
         pkt[0] = 0;
         sysinfo(&si);
 
-        statsd_prepare("load", 100*si.loads[0]/0x10000, "g", 1.0, tmp, MAX_LINE_LEN, 1);
+        statsd_prepare(link, "load", 100*si.loads[0]/0x10000, "g", 1.0, tmp, MAX_LINE_LEN, 1);
         strcat(pkt, tmp);
 
-        statsd_prepare("freemem", si.freeram/1024, "g", 1.0, tmp, MAX_LINE_LEN, 1);
+        statsd_prepare(link, "freemem", si.freeram/1024, "g", 1.0, tmp, MAX_LINE_LEN, 1);
         strcat(pkt, tmp);
 
 /*
@@ -100,10 +101,10 @@ int main(int argc, char *argv[])
         strcat(pkt, tmp);
 */
 
-        statsd_prepare("procs", si.procs, "g", 1.0, tmp, MAX_LINE_LEN, 1);
+        statsd_prepare(link, "procs", si.procs, "g", 1.0, tmp, MAX_LINE_LEN, 1);
         strcat(pkt, tmp);
 
-        statsd_prepare("uptime", si.uptime, "c", 1.0, tmp, MAX_LINE_LEN, 1);
+        statsd_prepare(link, "uptime", si.uptime, "c", 1.0, tmp, MAX_LINE_LEN, 1);
         strcat(pkt, tmp);
 
         rewind(net);
@@ -116,10 +117,10 @@ int main(int argc, char *argv[])
             for (i = 0, p = strtok_r(line, " ", &lasts); p;
                 p = strtok_r(NULL, " ", &lasts), i++) {
                 if (i == 1) {
-                    statsd_prepare("if-rx", atoi(p), "c", 1.0, tmp, MAX_LINE_LEN, 1);
+                    statsd_prepare(link, "if-rx", atoi(p), "c", 1.0, tmp, MAX_LINE_LEN, 1);
                     strcat(pkt, tmp);
                 } else if (i == 9) {
-                    statsd_prepare("if-tx", atoi(p), "c", 1.0, tmp, MAX_LINE_LEN, 1);
+                    statsd_prepare(link, "if-tx", atoi(p), "c", 1.0, tmp, MAX_LINE_LEN, 1);
                     strcat(pkt, tmp);
                     break;
                 }
@@ -133,11 +134,11 @@ int main(int argc, char *argv[])
         total = user + sys + idle;
         busy = user + sys;
 
-        statsd_prepare("cpu", 100 * (busy - old_busy)/(total - old_total), "g", 1.0, tmp, MAX_LINE_LEN, 0);
+        statsd_prepare(link, "cpu", 100 * (busy - old_busy)/(total - old_total), "g", 1.0, tmp, MAX_LINE_LEN, 0);
         strcat(pkt, tmp);
 
         // printf("pkt:\n%s\n\n", pkt);
-        statsd_send(pkt);
+        statsd_send(link, pkt);
 
         old_total = total;
         old_busy = busy;
@@ -146,7 +147,7 @@ int main(int argc, char *argv[])
 
     fclose(net);
     fclose(stat);
-    statsd_finalize();
+    statsd_finalize(link);
 
     exit(0);
 }
