@@ -31,12 +31,15 @@ statsd_link *statsd_init_with_namespace(const char *host, int port, const char *
 
 statsd_link *statsd_init(const char *host, int port)
 {
-    statsd_link *temp = malloc(sizeof(statsd_link));
-
+    statsd_link *temp = calloc(1, sizeof(statsd_link));
+    if (!temp) {
+	fprintf(stderr, "calloc() failed");
+	goto err;
+    }
 
     if ((temp->sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
         perror("socket");
-        return NULL;
+        goto err;
     }
 
     memset(&temp->server, 0, sizeof(temp->server));
@@ -51,18 +54,24 @@ statsd_link *statsd_init(const char *host, int port)
     int error;
     if ( (error = getaddrinfo(host, NULL, &hints, &result)) ) {
         fprintf(stderr, "%s\n", gai_strerror(error));
-        return NULL;
+	goto err;
     }
-    memcpy(&(temp->server).sin_addr, &((struct sockaddr_in*)result->ai_addr)->sin_addr, sizeof(struct in_addr));
+    memcpy(&(temp->server.sin_addr), &((struct sockaddr_in*)result->ai_addr)->sin_addr, sizeof(struct in_addr));
     freeaddrinfo(result);
 
-    if (inet_aton(host, &(temp->server).sin_addr) == 0) {
+    if (inet_aton(host, &(temp->server.sin_addr)) == 0) {
         perror("inet_aton");
-        return NULL;
+	goto err;
     }
     srandom(time(NULL));
 
     return temp;
+
+err:
+    if (temp)
+	free(temp)
+
+    return NULL;
 }
 
 void statsd_finalize(statsd_link *link)
@@ -79,13 +88,8 @@ void statsd_finalize(statsd_link *link)
         link->ns = NULL;
     }
 
-    // free sockaddr_in
-    free(&link->server);
-
     // free whole link
     free(link);
-
-
 }
 
 /* will change the original string */
