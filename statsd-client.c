@@ -69,7 +69,7 @@ statsd_link *statsd_init(const char *host, int port)
 
 err:
     if (temp)
-	free(temp)
+	free(temp);
 
     return NULL;
 }
