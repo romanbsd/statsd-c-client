@@ -56,10 +56,6 @@ statsd_link *statsd_init(const char *host, int port)
     memcpy(&(temp->server).sin_addr, &((struct sockaddr_in*)result->ai_addr)->sin_addr, sizeof(struct in_addr));
     freeaddrinfo(result);
 
-    if (inet_aton(host, &(temp->server).sin_addr) == 0) {
-        perror("inet_aton");
-        return NULL;
-    }
     srandom(time(NULL));
 
     return temp;
