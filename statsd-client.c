@@ -33,8 +33,8 @@ statsd_link *statsd_init(const char *host, int port)
 {
     statsd_link *temp = calloc(1, sizeof(statsd_link));
     if (!temp) {
-	fprintf(stderr, "calloc() failed");
-	goto err;
+        fprintf(stderr, "calloc() failed");
+        goto err;
     }
 
     if ((temp->sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
@@ -54,22 +54,23 @@ statsd_link *statsd_init(const char *host, int port)
     int error;
     if ( (error = getaddrinfo(host, NULL, &hints, &result)) ) {
         fprintf(stderr, "%s\n", gai_strerror(error));
-	goto err;
+        goto err;
     }
     memcpy(&(temp->server.sin_addr), &((struct sockaddr_in*)result->ai_addr)->sin_addr, sizeof(struct in_addr));
     freeaddrinfo(result);
 
     if (inet_aton(host, &(temp->server.sin_addr)) == 0) {
         perror("inet_aton");
-	goto err;
+        goto err;
     }
     srandom(time(NULL));
 
     return temp;
 
 err:
-    if (temp)
-	free(temp);
+    if (temp) {
+        free(temp);
+    }
 
     return NULL;
 }
