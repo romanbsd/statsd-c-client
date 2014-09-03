@@ -4,8 +4,8 @@ Release:	1%{?dist}
 Summary:	Statsd C client library
 
 Group:		System Environment/Daemons
-License:	Unknown
-URL:		https://github.com/etsy/statsd
+License:	MIT
+URL:		https://github.com/romanbsd/statsd-c-client
 Source0:	%{name}-%{version}.tar.bz2
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -16,11 +16,11 @@ Requires:	glibc
 Client library that implements the statsd protocol
 
 %package devel
-Summary:	Development files for statsd client
+Summary:	Development package for statsd client
 Group:		System Environment/Daemons
 
 %description devel
-Client library header files of the statsd protocol
+Header files of the statsd client package
 
 %prep
 %setup -q -n %{name}
