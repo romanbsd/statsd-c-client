@@ -14,6 +14,9 @@
 
 statsd_link *statsd_init_with_namespace(const char *host, int port, const char *ns_)
 {
+    if (!host || !port || !ns_)
+        return NULL;
+
     size_t len = strlen(ns_);
 
     statsd_link *temp = statsd_init(host, port);
@@ -31,6 +34,9 @@ statsd_link *statsd_init_with_namespace(const char *host, int port, const char *
 
 statsd_link *statsd_init(const char *host, int port)
 {
+    if (!host || !port)
+        return NULL;
+    
     statsd_link *temp = calloc(1, sizeof(statsd_link));
     if (!temp) {
         fprintf(stderr, "calloc() failed");
@@ -73,6 +79,8 @@ err:
 
 void statsd_finalize(statsd_link *link)
 {
+    if (!link) return;
+
     // close socket
     if (link->sock != -1) {
         close(link->sock);
@@ -112,6 +120,7 @@ static int should_send(float sample_rate)
 
 int statsd_send(statsd_link *link, const char *message)
 {
+    if (!link) return -2;
     int slen = sizeof(link->server);
 
     if (sendto(link->sock, message, strlen(message), 0, (struct sockaddr *) &link->server, slen) == -1) {
@@ -135,6 +144,8 @@ static int send_stat(statsd_link *link, char *stat, size_t value, const char *ty
 
 void statsd_prepare(statsd_link *link, char *stat, size_t value, const char *type, float sample_rate, char *message, size_t buflen, int lf)
 {
+    if (!link) return;
+    
     cleanup(stat);
     if (sample_rate == 1.0) {
         snprintf(message, buflen, "%s%s:%zd|%s%s", link->ns ? link->ns : "", stat, value, type, lf ? "\n" : "");
