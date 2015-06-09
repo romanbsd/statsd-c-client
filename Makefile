@@ -6,7 +6,7 @@ LIB_DIR=$(LOCAL_DIR)/lib
 INCLUDE_DIR=$(LOCAL_DIR)/include/statsd
 CCFLAGS=
 CFLAGS+=-Wall -g
-LIBNAME=libstatsdclient.so.$(major_version)
+LIBNAME=libstatsdclient.so
 LIBFLAGS=
 
 
