@@ -27,6 +27,8 @@ else
     ifeq ($(UNAME_S),Darwin)
         CCFLAGS += -install_name $(LIBNAME) -D OSX
 		LIBFLAGS += -dynamiclib
+	else
+		LIBFLAGS += -shared
     endif
     UNAME_P := $(shell uname -p)
     ifeq ($(UNAME_P),x86_64)
@@ -57,6 +59,7 @@ libstatsdclient.so:	statsd-client.c
 install: lib
 	cp libstatsdclient.so.$(version) $(LIB_DIR)
 	ln -sf $(LIB_DIR)/libstatsdclient.so.$(version) $(LIB_DIR)/$(LIBNAME)
+	ln -sf $(LIB_DIR)/libstatsdclient.so.$(version) $(LIB_DIR)/$(LIBNAME).$(major_version)
 	mkdir -p $(INCLUDE_DIR)
 	cp statsd-client.h $(INCLUDE_DIR)
 
