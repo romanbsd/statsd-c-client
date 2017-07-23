@@ -20,6 +20,8 @@ statsd_link *statsd_init_with_namespace(const char *host, int port, const char *
     size_t len = strlen(ns_);
 
     statsd_link *temp = statsd_init(host, port);
+    if(!temp)
+        return NULL;
 
     if ( (temp->ns = malloc(len + 2)) == NULL ) {
         perror("malloc");
