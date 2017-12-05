@@ -177,7 +177,7 @@ int statsd_gauge(statsd_link *link, char *stat, size_t value)
     return send_stat(link, stat, value, "g", 1.0);
 }
 
-int statsd_timing(statsd_link *link, char *stat, size_t ms)
+int statsd_timing(statsd_link *link, char *stat, size_t ms, float sample_rate)
 {
-    return send_stat(link, stat, ms, "ms", 1.0);
+    return send_stat(link, stat, ms, "ms", sample_rate);
 }
