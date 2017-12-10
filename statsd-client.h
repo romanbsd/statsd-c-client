@@ -32,4 +32,5 @@ int statsd_dec(statsd_link *link, char *stat, float sample_rate);
 int statsd_count(statsd_link *link, char *stat, size_t count, float sample_rate);
 int statsd_gauge(statsd_link *link, char *stat, size_t value);
 int statsd_timing(statsd_link *link, char *stat, size_t ms);
+int statsd_timing_with_sample_rate(statsd_link *link, char *stat, size_t ms, float sample_rate);
 #endif

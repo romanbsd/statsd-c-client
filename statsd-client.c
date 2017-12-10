@@ -152,7 +152,7 @@ void statsd_prepare(statsd_link *link, char *stat, size_t value, const char *typ
     if (sample_rate == 1.0) {
         snprintf(message, buflen, "%s%s:%zd|%s%s", link->ns ? link->ns : "", stat, value, type, lf ? "\n" : "");
     } else {
-        snprintf(message, buflen, "%s%s:%zd|%s|@%.2f%s", link->ns ? link->ns : "", stat, value, type, sample_rate, lf ? "\n" : "");
+        snprintf(message, buflen, "%s%s:%zd|%s|@%.5f%s", link->ns ? link->ns : "", stat, value, type, sample_rate, lf ? "\n" : "");
     }
 }
 
@@ -179,5 +179,10 @@ int statsd_gauge(statsd_link *link, char *stat, size_t value)
 
 int statsd_timing(statsd_link *link, char *stat, size_t ms)
 {
-    return send_stat(link, stat, ms, "ms", 1.0);
+    return statsd_timing_with_sample_rate(link, stat, ms, 1.0);
+}
+
+int statsd_timing_with_sample_rate(statsd_link *link, char *stat, size_t ms, float sample_rate)
+{
+    return send_stat(link, stat, ms, "ms", sample_rate);
 }
