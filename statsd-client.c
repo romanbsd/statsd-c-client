@@ -152,7 +152,7 @@ void statsd_prepare(statsd_link *link, char *stat, size_t value, const char *typ
     if (sample_rate == 1.0) {
         snprintf(message, buflen, "%s%s:%zd|%s%s", link->ns ? link->ns : "", stat, value, type, lf ? "\n" : "");
     } else {
-        snprintf(message, buflen, "%s%s:%zd|%s|@%.2f%s", link->ns ? link->ns : "", stat, value, type, sample_rate, lf ? "\n" : "");
+        snprintf(message, buflen, "%s%s:%zd|%s|@%.5f%s", link->ns ? link->ns : "", stat, value, type, sample_rate, lf ? "\n" : "");
     }
 }
 
