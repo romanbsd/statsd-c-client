@@ -8,9 +8,12 @@
 #include <netinet/in.h>
 #include "statsd-client.h"
 
+#if defined(TARGET_ESP_IDF)
+#include <esp_log.h>
+#define TAG "statsd-client"
+#endif
+
 #define MAX_MSG_LEN 100
-
-
 
 statsd_link *statsd_init_with_namespace(const char *host, int port, const char *ns_)
 {
@@ -38,10 +41,14 @@ statsd_link *statsd_init(const char *host, int port)
 {
     if (!host || !port)
         return NULL;
-    
+
     statsd_link *temp = calloc(1, sizeof(statsd_link));
     if (!temp) {
+#if defined(TARGET_ESP_IDF)
+        ESP_LOGE(TAG, "calloc() failed");
+#else
         fprintf(stderr, "calloc() failed");
+#endif
         goto err;
     }
 
@@ -61,13 +68,19 @@ statsd_link *statsd_init(const char *host, int port)
 
     int error;
     if ( (error = getaddrinfo(host, NULL, &hints, &result)) ) {
+#if defined(TARGET_ESP_IDF)
+        ESP_LOGE(TAG, "getaddrinfo(): %x", error);
+#else
         fprintf(stderr, "%s\n", gai_strerror(error));
+#endif
         goto err;
     }
     memcpy(&(temp->server.sin_addr), &((struct sockaddr_in*)result->ai_addr)->sin_addr, sizeof(struct in_addr));
     freeaddrinfo(result);
 
+#if !defined(TARGET_ESP_IDF)
     srandom(time(NULL));
+#endif
 
     return temp;
 
@@ -113,7 +126,11 @@ static void cleanup(char *stat)
 static int should_send(float sample_rate)
 {
     if (sample_rate < 1.0) {
+#if defined(TARGET_ESP_IDF)
+        float p = ((float)esp_random() / RAND_MAX);
+#else
         float p = ((float)random() / RAND_MAX);
+#endif
         return sample_rate > p;
     } else {
         return 1;
@@ -147,7 +164,7 @@ static int send_stat(statsd_link *link, char *stat, size_t value, const char *ty
 void statsd_prepare(statsd_link *link, char *stat, size_t value, const char *type, float sample_rate, char *message, size_t buflen, int lf)
 {
     if (!link) return;
-    
+
     cleanup(stat);
     if (sample_rate == 1.0) {
         snprintf(message, buflen, "%s%s:%zd|%s%s", link->ns ? link->ns : "", stat, value, type, lf ? "\n" : "");

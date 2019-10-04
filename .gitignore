@@ -2,3 +2,6 @@
 *.so
 *.so.*
 test-client
+sdkconfig
+sdkconfig.old
+**/build
