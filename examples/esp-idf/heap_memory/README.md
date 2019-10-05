@@ -64,7 +64,7 @@ time                value
 1570254270000000000 50696
 ```
 
-The except from `telegraf.conf`.
+The excerpt from `telegraf.conf`.
 
 ```
 [[inputs.statsd]]
