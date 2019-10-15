@@ -1,0 +1,5 @@
+set(COMPONENT_SRCS "statsd-client.c")
+set(COMPONENT_ADD_INCLUDEDIRS .)
+set(COMPONENT_REQUIRES log)
+register_component()
+target_compile_options(${COMPONENT_LIB} PRIVATE -DTARGET_ESP_IDF)
