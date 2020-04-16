@@ -26,7 +26,7 @@ statsd_link *statsd_init_with_namespace(const char *host, int port, const char *
     if(!temp)
         return NULL;
 
-    if ( (temp->ns = malloc(len + 2)) == NULL ) {
+    if ( (temp->ns = (char *)malloc(len + 2)) == NULL ) {
         perror("malloc");
         return NULL;
     }
@@ -42,7 +42,7 @@ statsd_link *statsd_init(const char *host, int port)
     if (!host || !port)
         return NULL;
 
-    statsd_link *temp = calloc(1, sizeof(statsd_link));
+    statsd_link *temp = (statsd_link *)calloc(1, sizeof(statsd_link));
     if (!temp) {
 #if defined(TARGET_ESP_IDF)
         ESP_LOGE(TAG, "calloc() failed");
@@ -61,7 +61,7 @@ statsd_link *statsd_init(const char *host, int port)
     temp->server.sin_family = AF_INET;
     temp->server.sin_port = htons(port);
 
-    struct addrinfo *result = NULL, hints;
+    struct addrinfo *result, hints;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_DGRAM;
@@ -129,7 +129,7 @@ static int should_send(float sample_rate)
 #if defined(TARGET_ESP_IDF)
         float p = ((float)esp_random() / RAND_MAX);
 #else
-        float p = ((float)random() / RAND_MAX);
+        float p = ((float)random() / (float)RAND_MAX);
 #endif
         return sample_rate > p;
     } else {
