@@ -13,7 +13,7 @@ int main(void)
     statsd_gauge(link, "speed", 10);
     statsd_timing(link2, "request", 2400);
     link3 = statsd_init_with_tags("127.0.0.1", 8125, "mytag:myvalue");
-    statsd_count(link, "tagcount", 42, 1.0);
+    statsd_count(link3, "tagcount", 42, 1.0);
     sleep(1);
     statsd_inc(link, "count1", 1.0);
     statsd_dec(link2, "count2", 1.0);
