@@ -15,26 +15,80 @@
 
 #define MAX_MSG_LEN 100
 
+static int statsd_init_namespace(statsd_link *link, const char* ns_)
+{
+  size_t len = strlen(ns_);
+  if ( (link->ns = malloc(len + 2)) == NULL ) {
+      perror("malloc");
+      return -1;
+  }
+  strcpy(link->ns, ns_);
+  link->ns[len++] = '.';
+  link->ns[len] = 0;
+
+  return 0;
+}
+
+static int statsd_init_tags(statsd_link *link, const char* tags_)
+{
+  size_t len = strlen(tags_);
+  if ( (link->tags = malloc(len + 2)) == NULL ) {
+      perror("malloc");
+      return -1;
+  }
+  link->tags[0] = '|';
+  link->tags[1] = '#';
+  strcpy(&link->tags[2], tags_);
+
+  return 0;
+}
+
 statsd_link *statsd_init_with_namespace(const char *host, int port, const char *ns_)
 {
     if (!host || !port || !ns_)
         return NULL;
 
-    size_t len = strlen(ns_);
-
     statsd_link *temp = statsd_init(host, port);
     if(!temp)
         return NULL;
 
-    if ( (temp->ns = (char *)malloc(len + 2)) == NULL ) {
-        perror("malloc");
+    if (statsd_init_namespace(temp, ns_) == -1)
         return NULL;
-    }
-    strcpy(temp->ns, ns_);
-    temp->ns[len++] = '.';
-    temp->ns[len] = 0;
 
     return temp;
+}
+
+statsd_link *statsd_init_with_tags(const char *host, int port, const char *tags_)
+{
+  if (!host || !port || !tags_)
+      return NULL;
+
+  statsd_link *temp = statsd_init(host, port);
+  if(!temp)
+      return NULL;
+
+  if (statsd_init_tags(temp, tags_) == -1)
+      return NULL;
+
+  return temp;
+}
+
+statsd_link *statsd_init_with_namespace_tags(const char *host, int port, const char *ns_, const char *tags_)
+{
+  if (!host || !port || !ns_ || !tags_)
+      return NULL;
+
+  statsd_link *temp = statsd_init(host, port);
+  if(!temp)
+      return NULL;
+
+  if(statsd_init_namespace(temp, ns_) == -1)
+      return NULL;
+
+  if (statsd_init_tags(temp, tags_) == -1)
+      return NULL;
+
+  return temp;
 }
 
 statsd_link *statsd_init(const char *host, int port)
@@ -108,6 +162,12 @@ void statsd_finalize(statsd_link *link)
         link->ns = NULL;
     }
 
+    // freeing tags
+    if (link->tags) {
+        free(link->tags);
+        link->tags = NULL;
+    }
+
     // free whole link
     free(link);
 }
@@ -167,9 +227,9 @@ void statsd_prepare(statsd_link *link, char *stat, size_t value, const char *typ
 
     cleanup(stat);
     if (sample_rate == 1.0) {
-        snprintf(message, buflen, "%s%s:%zd|%s%s", link->ns ? link->ns : "", stat, value, type, lf ? "\n" : "");
+        snprintf(message, buflen, "%s%s:%zd|%s%s%s", link->ns ? link->ns : "", stat, value, type, link->tags ? link->tags : "", lf ? "\n" : "");
     } else {
-        snprintf(message, buflen, "%s%s:%zd|%s|@%.5f%s", link->ns ? link->ns : "", stat, value, type, sample_rate, lf ? "\n" : "");
+        snprintf(message, buflen, "%s%s:%zd|%s|@%.5f%s%s", link->ns ? link->ns : "", stat, value, type, sample_rate, link->tags ? link->tags : "", lf ? "\n" : "");
     }
 }
 

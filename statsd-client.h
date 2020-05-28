@@ -8,6 +8,7 @@ struct _statsd_link  {
 	struct sockaddr_in server;
 	int sock;
 	char *ns;
+	char *tags;
 };
 
 typedef struct _statsd_link statsd_link;
@@ -15,6 +16,8 @@ typedef struct _statsd_link statsd_link;
 
 statsd_link *statsd_init(const char *host, int port);
 statsd_link *statsd_init_with_namespace(const char *host, int port, const char *ns);
+statsd_link *statsd_init_with_tags(const char *host, int port, const char *tags);
+statsd_link *statsd_init_with_namespace_tags(const char *host, int port, const char *ns, const char *tags);
 void statsd_finalize(statsd_link *link);
 
 /*
