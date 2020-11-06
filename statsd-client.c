@@ -32,7 +32,7 @@ static int statsd_init_namespace(statsd_link *link, const char* ns_)
 static int statsd_init_tags(statsd_link *link, const char* tags_)
 {
   size_t len = strlen(tags_);
-  if ( (link->tags = malloc(len + 2)) == NULL ) {
+  if ( (link->tags = malloc(len + 3)) == NULL ) {
       perror("malloc");
       return -1;
   }
